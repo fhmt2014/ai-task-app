@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Navbar } from "@/app/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,11 +20,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en">
+      <body>
+        <Navbar />
+        <nav style={{ padding: 16, background: "#f0f0f0" }}>
+          <a href="/">首页</a> | <a href="/about">关于</a>|{" "}
+          <a href="/dashboard">仪表盘</a> | <a href="/tasks">任务管理</a>|{" "}
+          <a href="/tasks-server">任务管理(Server Actions)</a>|{" "}
+          <a href="/ai-chat">AI 助手</a>
+        </nav>
+        <main style={{ padding: 16 }}>{children}</main>
+        <footer style={{ padding: 16, background: "#333", color: "white" }}>
+          我的第一个 Next.js 应用
+        </footer>
+      </body>
     </html>
   );
 }
