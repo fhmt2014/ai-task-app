@@ -2,6 +2,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { createTaskSchema } from "@/lib/validations";
 export interface ActionResult {
@@ -21,6 +22,11 @@ export async function createTask(
 ): Promise<CreateTaskState> {
   const title = formData.get("title") as string;
 
+  // 1. 获取当前用户 session
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("未登录");
+  }
   // if (!title || title.trim().length === 0) {
   //   return { success: false, error: '标题不能为空' }
   // }
@@ -46,7 +52,10 @@ export async function createTask(
   // 3. 校验通过 → 写数据库
 
   await prisma.task.create({
-    data: { title: parsed.data.title },
+    data: {
+      title: parsed.data.title,
+      user: { connect: { id: session.user.id } },
+    },
   });
   // 关键：重新验证 /tasks 页面的缓存
   revalidatePath("/tasks-server");

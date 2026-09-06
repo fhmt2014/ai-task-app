@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 // 内存数据存储（生产环境用数据库替代）
 // let tasks = [
 //   { id: '1', title: '学习 Next.js Route Handlers', completed: true },
@@ -22,7 +23,11 @@ export async function GET(req: NextRequest) {
 // POST /api/tasks —— 创建新任务
 export async function POST(request: NextRequest) {
   const body = await request.json();
-
+  // 1. 鉴权
+  const session = await auth();
+  if (!session?.user?.id) {
+    return Response.json({ error: "未登录" }, { status: 401 });
+  }
   // 简单验证
   if (!body.title || body.title.trim().length === 0) {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -36,7 +41,10 @@ export async function POST(request: NextRequest) {
 
   // tasks.push(newTask)
   const task = await prisma.task.create({
-    data: { title: body.title.trim() },
+    data: {
+      title: body.title.trim(),
+      user: { connect: { id: session.user.id } },
+    },
   });
   return NextResponse.json(task, { status: 201 });
 }
