@@ -24,4 +24,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
+  // Vercel 上让 Auth.js 按请求 Host 自动算 callback，别写死 AUTH_URL
+  trustHost: true,
 });
